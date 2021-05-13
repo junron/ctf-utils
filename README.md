@@ -2,6 +2,11 @@
 
 A bunch of functions for CTFing
 
+## Installation
+```shell
+python3 -m pip install git+ssh://git@github.com/junron/ctf-lib.git
+```
+
 ## Generic/misc
 [Pyjail](./ctflib/generic/pyjail.md)  
 [Reverse shells](./ctflib/generic/reverse_shell.md)  
