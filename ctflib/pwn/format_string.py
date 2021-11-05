@@ -106,4 +106,4 @@ def leak_pie_base(setup: SetupFunction, max_input_length: Union[None, int] = Non
         run2 = sub(*output[1][i])
         if run1 == run2:
             print(f"Found pie base mapping, stack offset {i + offset}, pie base offset {-run1}")
-            return i, -run1
+            return i + offset, -run1
