@@ -4,9 +4,9 @@ from typing import Union
 
 
 def decode_to_ascii(input: Union[str, int, bytes]) -> bytes:
-    if input is int:
+    if type(input) == int:
         input = hex(input)
-    if input is bytes:
+    if type(input) == bytes:
         input = input.decode("utf-8")
     if input[:2] == "0x":
         input = input[2:]
