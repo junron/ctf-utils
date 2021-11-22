@@ -104,7 +104,7 @@ def __leak_base(setup: SetupFunction, func: Callable[[int], int], max_input_leng
         run1 = sub(*output[0][i])
         run2 = sub(*output[1][i])
         if run1 == run2:
-            out += (i + offset, -run1)
+            out += [(i + offset, -run1)]
     return out
 
 
