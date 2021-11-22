@@ -1,6 +1,9 @@
 import os
 from binascii import a2b_hex
-from typing import Union
+from typing import Union, Callable
+import pwnlib.tubes.process
+
+SetupFunction = Callable[[], pwnlib.tubes.process.process]
 
 
 def decode_to_ascii(input: Union[str, int, bytes]) -> bytes:

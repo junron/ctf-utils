@@ -2,8 +2,8 @@ from typing import Optional
 
 from pwn import *
 
-from ctflib.pwn import SetupFunction, ELFSec, download_libc, fetch_libc_ver
-
+from ctflib.pwn import ELFSec, download_libc, fetch_libc_ver
+from ctflib.pwn.util import SetupFunction
 
 def find_bof_offset(e):
     loglevel = context.log_level
