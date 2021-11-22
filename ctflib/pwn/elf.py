@@ -1,3 +1,5 @@
+from dataclasses import dataclass
+
 from pwn import *
 
 from ctflib.pwn.util import get_pie_base
@@ -30,3 +32,24 @@ def debug(binary, addr, pre=None):
         g = io.gdb
         g.continue_and_wait()
         return io, g
+
+@dataclass
+class ELFSec:
+    canary: bool
+    stack_exec: bool
+    pie: bool
+    got_writable: bool
+    fini_array_writable: bool
+
+    @staticmethod
+    def get_sec(e: ELF):
+        out = e.checksec()
+        # Remove any ANSI characters from out
+        out = re.sub(r"\x1b\[\d+m", "", out)
+        return ELFSec(
+            canary="No canary found" not in out,
+            stack_exec="NX enabled" not in out,
+            pie="PIE enabled" in out,
+            got_writable="Full RELRO" not in out,
+            fini_array_writable="No RELRO" in out
+        )

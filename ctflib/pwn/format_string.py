@@ -1,10 +1,10 @@
-from typing import Callable, Union, List, Tuple
+from typing import Callable, Union, List, Tuple, Optional
 
 import pwnlib.tubes.process
 from pwnlib.context import context
 
 from ctflib.pwn import debug, get_pie_base
-from ctflib.pwn.util import decode_to_ascii
+from ctflib.pwn.util import decode_to_ascii, get_libc_base, get_ld_base
 
 SetupFunction = Callable[[], pwnlib.tubes.process.process]
 
@@ -81,8 +81,8 @@ def find_canary_offset(binary: pwnlib.elf.elf, break_addr: int, max_input_length
         g.quit()
 
 
-def leak_pie_base(setup: SetupFunction, max_input_length: Union[None, int] = None,
-                  offset: int = 6, until: int = 30) -> Union[Tuple[int, int], None]:
+def __leak_base(setup: SetupFunction, func: Callable[[int], int], max_input_length: Union[None, int] = None,
+                offset: int = 6, until: int = 30) -> Optional[List[Tuple[int, int]]]:
     if max_input_length is None:
         batch_size = 3
     else:
@@ -95,15 +95,31 @@ def leak_pie_base(setup: SetupFunction, max_input_length: Union[None, int] = Non
             out = read_stack(p, [x for x in range(i, i + batch_size)])
             if out:
                 for item in out:
-                    output[j].append((item, get_pie_base(p.pid)))
+                    output[j].append((item, func(p.pid)))
             p.close()
 
     def sub(a, b):
         return a - b
 
+    out = []
     for i in range(len(output[0])):
         run1 = sub(*output[0][i])
         run2 = sub(*output[1][i])
         if run1 == run2:
-            print(f"Found pie base mapping, stack offset {i + offset}, pie base offset {-run1}")
-            return i + offset, -run1
+            out += (i + offset, -run1)
+    return out
+
+
+def leak_pie_base(setup: SetupFunction, max_input_length: Union[None, int] = None,
+                  offset: int = 6, until: int = 30) -> Optional[List[Tuple[int, int]]]:
+    return __leak_base(setup, get_pie_base, max_input_length, offset, until)
+
+
+def leak_libc_base(setup: SetupFunction, max_input_length: Union[None, int] = None,
+                   offset: int = 6, until: int = 30) -> Optional[List[Tuple[int, int]]]:
+    return __leak_base(setup, get_libc_base, max_input_length, offset, until)
+
+
+def leak_ld_base(setup: SetupFunction, max_input_length: Union[None, int] = None,
+                 offset: int = 6, until: int = 30) -> Optional[List[Tuple[int, int]]]:
+    return __leak_base(setup, get_ld_base, max_input_length, offset, until)
