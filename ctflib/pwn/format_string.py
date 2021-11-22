@@ -3,8 +3,8 @@ from typing import Callable, Union, List, Tuple, Optional
 import pwnlib.tubes.process
 from pwnlib.context import context
 
-from ctflib.pwn import debug, get_pie_base
-from ctflib.pwn.util import decode_to_ascii, get_libc_base, get_ld_base, SetupFunction
+from ctflib.pwn.elf import debug
+from ctflib.pwn.util import decode_to_ascii, get_pie_base, get_libc_base, get_ld_base, SetupFunction
 
 
 def find_offset(setup: SetupFunction, max_input_length: Union[int, None] = None) -> int:
