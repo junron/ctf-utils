@@ -7,13 +7,14 @@ from ctflib.pwn.util import SetupFunction
 from ctflib.pwn.elf import ELFSec
 
 
-def find_bof_offset(e):
+def find_bof_offset(setup: SetupFunction):
+    elf = context.binary
+    assert elf is not None, "context.binary not set"
     loglevel = context.log_level
     context.log_level = "error"
-    context.binary = e
     os.system("rm core")
     payload = cyclic(1000, n=context.bits // 8)
-    p = e.process()
+    p = setup()
     p.sendline(payload)
     p.wait()
     core = Coredump("./core")
