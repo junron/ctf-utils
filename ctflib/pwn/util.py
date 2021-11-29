@@ -39,9 +39,9 @@ def get_ld_base(pid: int) -> int:
 def remote(connect_str: str) -> pwnlib.tubes.remote:
     connect_str.strip()
     if connect_str.startswith("nc"):
-        connect_str = connect_str.split(" ")[1]
-    if " " in connect_str:
-        host, port = connect_str.split(" ")
-    else:
+        connect_str = connect_str[2:].strip()
+    if ":" in connect_str:
         host, port = connect_str.split(":")
+    else:
+        host, port = connect_str.split()
     return pwnlib.tubes.remote.remote(host.strip(), int(port.strip()))

