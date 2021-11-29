@@ -30,3 +30,18 @@ def get_ld_base(pid: int) -> int:
     data = [x for x in os.popen(f"pmap {pid}").readlines() if "ld" in x]
     if data:
         return int(data[0].split(" ")[0], 16)
+
+
+# Parses `connect_str`, which is in one of the following forms:
+# <host>:<port>
+# <host> <port>
+# nc <host <port>
+def remote(connect_str: str) -> pwnlib.tubes.remote:
+    connect_str.strip()
+    if connect_str.startswith("nc"):
+        connect_str = connect_str.split(" ")[1]
+    if " " in connect_str:
+        host, port = connect_str.split(" ")
+    else:
+        host, port = connect_str.split(":")
+    return pwnlib.tubes.remote.remote(host.strip(), int(port.strip()))
