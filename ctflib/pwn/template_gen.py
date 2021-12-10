@@ -26,6 +26,10 @@ def generate_template(remote_conn: str):
     elf_sec = ELFSec.get_sec(mainElf)
     template = textwrap.dedent(f"""
     from ctflib.pwn import *
+    
+    '''
+    gen_func
+    '''
 
     e = ELF("{mainElf.path}")
     context.binary = e
@@ -46,6 +50,10 @@ def generate_template(remote_conn: str):
     Writable segments:
     GOT: {'Yes' if elf_sec.got_writable else 'No'}
     fini_array: {'Yes' if elf_sec.fini_array_writable else 'No'}
+    '''
+    
+    '''
+    gen_funcs([""], setup, __file__)
     '''
 
     if __name__ == '__main__':

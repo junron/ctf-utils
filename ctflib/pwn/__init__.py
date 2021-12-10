@@ -3,6 +3,7 @@ from .elf import *
 from .format_string import *
 from .libc import *
 from .util import *
+from .func_gen import gen_funcs, gen_func
 
 pack = p64 if context.bits == 64 else p32
 unpack = u64 if context.bits == 64 else u32
