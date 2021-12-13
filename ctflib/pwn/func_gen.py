@@ -23,6 +23,7 @@ def gen_func(gen_str: str, setup: SetupFunction):
     code = ""
     for item in gen_str.split(".")[1:]:
         recv = p.clean().decode().strip().split("\n")[-1]
+        recv = recv.replace('\'', '\\\'')
         code += f"p.recvuntil('{recv}')\n"
         try:
             int(item)
