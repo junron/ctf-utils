@@ -19,7 +19,7 @@ def decode_to_ascii(input: Union[str, int, bytes]) -> bytes:
 
 def get_pie_base(pid: int) -> int:
     binary_name = context.binary.path.split("/")[-1]
-    data = [x for x in os.popen(f"pmap {pid}").readlines() if binary_name in x]
+    data = [x for x in os.popen(f"pmap {pid}").readlines() if binary_name in x and x.startswith("0")]
     if data:
         return int(data[0].split(" ")[0], 16)
 
