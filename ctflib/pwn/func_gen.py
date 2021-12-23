@@ -20,7 +20,7 @@ def gen_func(gen_str: str, setup: SetupFunction):
     p = setup()
     name = gen_str.split(".")[0]
     params = []
-    code = ""
+    code = "p=q\n"
     for item in gen_str.split(".")[1:]:
         recv = p.clean().decode().strip().split("\n")[-1]
         recv = recv.replace('\'', '\\\'')
