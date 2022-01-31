@@ -146,6 +146,7 @@ def init_wasabi():
     os.system(f"wasabi {wasm}")
     include_script = f"<script src=\"out/{wasm_name}.wasabi.js\"></script>\n"
     include_script += f"<script src=\"analysis.js\"></script>"
+    open("./analysis.js", "w").write(analysis)
     os.system(f"mv {wasm} {wasm}.old")
     os.system(f"mv out/{wasm} {wasm}")
     with open(html, "r") as f:

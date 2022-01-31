@@ -12,11 +12,17 @@ def generate_template(remote_conn: str):
             elfs.append(ELF(file, checksec=False))
 
     mainElf = None
+    libc = None
+    ld = None
     for elf in elfs:
         os.system("chmod +x " + elf.path)
         # Shared objects are probably not the main ELF
         if "so" in elf.path:
             print("Detected shared object: " + elf.path)
+            if "libc" in elf.path:
+                libc = os.path.relpath(elf.path)
+            elif "ld" in elf.path:
+                ld = os.path.relpath(elf.path)
             continue
         if mainElf is not None:
             print("Warning: detected multiple ELFs", mainElf.path)
@@ -31,11 +37,13 @@ def generate_template(remote_conn: str):
     gen_func
     '''
 
-    e = ELF("{mainElf.path}")
+    e = ELF("{os.path.relpath(mainElf.path)}")
+    {'libc = ELF("' + libc + '")' if libc is not None else ''}
+    {'ld = ELF("' + ld + '")' if ld is not None else ''}
     context.binary = e
 
     def setup():
-        p = e.process()
+        p = {'process([ld.path, e.path], env={"LD_PRELOAD": libc.path})' if ld is not None and libc is not None else 'e.process()'}
         # p = remote("{remote_conn}")
         return p
 
