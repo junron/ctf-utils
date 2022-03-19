@@ -1,6 +1,9 @@
 import click
+from pwnlib.elf import ELF
+
 import ctflib.pwn.template_gen as tg
 import ctflib.web.template_gen as web_tg
+from ctflib.pwn.patcher import patch_alarms
 from ctflib.web.wasabi import init_wasabi
 
 
@@ -17,6 +20,13 @@ def cli(ctx):
 @click.option('--remote', '-r', default='', help='remote connection string')
 def pwn(remote: str):
     tg.generate_template(remote)
+    
+@cli.command()
+@click.option('--elf', '-e', default='', help='Binary to patch')
+def disalarm(elf: str):
+    e = ELF(elf)
+    patch_alarms(e)
+    print("Patched!")
     
 @cli.command()
 @click.option('--url', '-u', default='', help='web url')
