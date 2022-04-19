@@ -24,6 +24,9 @@ def generate_template(remote_conn: str):
             elif "ld" in elf.path:
                 ld = os.path.relpath(elf.path)
             continue
+        # Ignore core files
+        if os.path.basename(elf.path) == "core":
+            continue
         if mainElf is not None:
             print("Warning: detected multiple ELFs", mainElf.path)
         mainElf = elf
@@ -38,12 +41,13 @@ def generate_template(remote_conn: str):
     '''
 
     e = ELF("{os.path.relpath(mainElf.path)}")
-    {'libc = ELF("' + libc + '")' if libc is not None else ''}
-    {'ld = ELF("' + ld + '")' if ld is not None else ''}
+    {'libc = ELF("' + libc + '", checksec=False)' if libc is not None else '# libc = ELF("", checksec=False)'}
+    {'ld = ELF("' + ld + '", checksec=False)' if ld is not None else '# ld = ELF("", checksec=False)'}
     context.binary = e
 
     def setup():
-        p = {'process([ld.path, e.path], env={"LD_PRELOAD": libc.path})' if ld is not None and libc is not None else 'e.process()'}
+        p = e.process()
+        # p = process([ld.path, e.path], env={{"LD_PRELOAD": libc.path}})
         # p = remote("{remote_conn}")
         return p
 
@@ -67,12 +71,19 @@ def generate_template(remote_conn: str):
     if __name__ == '__main__':
         # offset = find_bof_offset(setup)
         p = setup()
+        
+        def send_function(x: str|bytes):
+            q = p
+            q.sendlineafter("", x)
+            y = q.clean()
+            # print(y)
+            return y
 
         # libc_base = get_libc_base(p.pid)
         # e.address = get_pie_base(p.pid)
-
-
         # Happy pwning!
+        
+        
 
         p.interactive()
     """)
