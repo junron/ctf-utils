@@ -18,7 +18,7 @@ def find_offset(setup: SetupFunction, max_input_length: Union[int, None] = None)
             return i + 1
 
 
-def read_stack(sf: SendFunction, indexes: List[int]) -> Tuple[pwnlib.tubes.process, List[int]]:
+def read_stack(sf: SendFunction, indexes: List[int]) -> Tuple[pwnlib.tubes.process.process, List[int]]:
     payload = []
     for i in indexes:
         # If 64 bit, use %llx
