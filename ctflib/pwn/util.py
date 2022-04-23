@@ -6,7 +6,7 @@ import pwnlib.tubes.process
 from pwnlib.context import context
 
 SetupFunction = Callable[[], pwnlib.tubes.process.process]
-SendFunction = Callable[[str|bytes], Tuple[str|bytes, pwnlib.tubes.process.process]]
+SendFunction = Callable[[pwnlib.tubes.process.process, str|bytes], str|bytes]
 
 
 def decode_to_ascii(input: Union[str, int, bytes]) -> bytes:

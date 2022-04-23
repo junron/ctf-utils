@@ -3,27 +3,22 @@ import urllib.request
 from typing import List, Tuple
 
 import requests
-from bs4 import BeautifulSoup
 from pwnlib.elf import ELF
 
 
-def fetch_libc_ver(addr, func="_IO_puts"):
-    addr = hex(addr)[-3:]
-    url = f"https://libc.blukat.me/?q={func}%3A0{addr}"
-    soup = BeautifulSoup(requests.get(url).text, "html.parser")
-    libcs = [x.text.strip() for x in soup.select("a.lib-item")]
-    return libcs
+def fetch_libc_ver(addr, func="_IO_puts", include_ret=False):
+    resp = requests.post("https://libc.rip/api/find", json={
+        "symbols":{
+            func: hex(addr)
+        }
+    }).json()
+    if include_ret:
+        return [(x["id"],int(x["symbols"]["__libc_start_main_ret"],16)) for x in resp]
+    else:
+        return [x["id"] for x in resp]
 
-def fetch_libc_ret(addr) -> Tuple[List[str], int]|None:
-    addr = hex(addr)[-3:]
-    url = f"https://libc.blukat.me/?q=__libc_start_main_ret%3A0{addr}"
-    soup = BeautifulSoup(requests.get(url).text, "html.parser")
-    libcs = [x.text.strip() for x in soup.select("a.lib-item")]
-    if len(libcs) == 0:
-        return None
-    url2 = f"https://libc.blukat.me/?q=__libc_start_main_ret%3A0{addr}&l={libcs[0]}"
-    s2 = BeautifulSoup(requests.get(url2).text,"html.parser")
-    return libcs, int(s2.select_one(".symbol-ofs").text, 16)
+def fetch_libc_ret(addr):
+    return fetch_libc_ver(addr, "__libc_start_main_ret", True)
 
 def download_libc(version, download_location="/home/kali/Desktop/ctf-stuff/libc-cache"):
     if not os.path.isdir(download_location):
@@ -32,25 +27,10 @@ def download_libc(version, download_location="/home/kali/Desktop/ctf-stuff/libc-
     if os.path.isfile(out_file):
         return out_file
     print("Downloading libc", version)
-    url = f"https://libc.blukat.me/d/{version}.so"
+    url = f"https://libc.rip/download/{version}.so"
     urllib.request.urlretrieve(url, out_file)
     return out_file
 
-
-def set_libc_addr(libc, puts_addr):
-    libc_puts_addr = libc.symbols._IO_puts
-    libc_addr = puts_addr - libc_puts_addr
-    libc.address = libc_addr
-    print("Libc address", hex(libc.address))
-    assert hex(libc.address).endswith("000"), "LIBC address not aligned"
-
-
-def system_shell(libc):
-    sys = libc.symbols.system
-    sh = next(libc.search(b"/bin/sh"))
-    return sys, sh
-
-
-def one_gadgets(elf: ELF) -> List[int]:
+def get_one_gadgets(elf: ELF) -> List[int]:
     output = os.popen(f"one_gadget -s echo {elf.path}").readlines()
     return [int(line) for line in output if "Try" not in line]

@@ -45,12 +45,6 @@ def generate_template(remote_conn: str):
     {'ld = ELF("' + ld + '", checksec=False)' if ld is not None else '# ld = ELF("", checksec=False)'}
     context.binary = e
 
-    def setup():
-        p = e.process()
-        # p = process([ld.path, e.path], env={{"LD_PRELOAD": libc.path}})
-        # p = remote("{remote_conn}")
-        return p
-
     '''
     Bits: {context.bits}
 
@@ -67,17 +61,27 @@ def generate_template(remote_conn: str):
     '''
     gen_funcs([""], setup, __file__)
     '''
+    
+    def setup():
+        p = e.process()
+        # p = process([ld.path, e.path], env={{"LD_PRELOAD": libc.path}})
+        # p = remote("{remote_conn}")
+        return p
+    
+    rop = ROP(e)
+    rop2 = ROP(e)
 
     if __name__ == '__main__':
         # offset = find_bof_offset(setup)
         p = setup()
         
-        def send_function(x: str|bytes):
-            q = p
+        def send(q, x: str|bytes):
             q.sendlineafter("", x)
             y = q.clean()
             # print(y)
             return y
+            
+        send_p = lambda x: send_function(p, x)
 
         # libc_base = get_libc_base(p.pid)
         # e.address = get_pie_base(p.pid)

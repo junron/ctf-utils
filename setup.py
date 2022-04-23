@@ -1,10 +1,10 @@
 from setuptools import setup, find_packages
 
 setup(name='ctflib',
-      version='3.3.2',
+      version='4.0.0',
       description='[PRIVATE] Tools for speeding up CTFing',
       author='jro',
-      install_requires=["z3-solver", "aiohttp", "requests", "beautifulsoup4", "pwntools", "click"],
+      install_requires=["z3-solver", "aiohttp", "requests", "pwntools", "click"],
       entry_points={
             'console_scripts': [
                   'ctf = ctflib.scripts.main:cli',
