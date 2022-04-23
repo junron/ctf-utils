@@ -1,4 +1,5 @@
 import os
+import string
 from binascii import a2b_hex
 from typing import Union, Callable, Tuple
 import pwnlib.tubes.process
@@ -50,3 +51,37 @@ def remote(connect_str: str) -> pwnlib.tubes.remote:
     else:
         host, port = connect_str.split()
     return pwnlib.tubes.remote.remote(host.strip(), int(port.strip()))
+
+def find_nonascii(x:bytes, length:int):
+    for i,a in enumerate(x):
+        if a not in string.printable.encode():
+            return x[i:i+length]
+
+def find_leak(x:bytes, length:int):
+    if b"\x7f" not in x:
+        return find_nonascii(x, length)
+    i = x.index(b"\x7f")
+    return x[i-length+1:i+1]
+
+def find_hex(x:bytes|str, length: int):
+    if type(x) is str:
+        x = x.encode()
+    hexdigits = b"abcdefABCDEF0123456789"
+    if b"0x" in x:
+        i = x.index(b"0x")
+        return int(x[i+2:i+length+2],16)
+    else:
+        i = 0
+        while i < len(x)-length+1:
+            for j in range(i, i+length):
+                if x[j] not in hexdigits:
+                    break
+            else:
+                return int(x[i:i+length],16)
+            i += 1
+
+def cyberthon_flag(p):
+    p.sendline("cat /home/*/*.txt")
+    x = p.clean()
+    print(x)
+    return x
