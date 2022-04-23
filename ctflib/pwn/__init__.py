@@ -10,7 +10,7 @@ from pwnlib.util.packing import pack as _pack
 from pwnlib.util.packing import unpack as _unpack
 
 __bad_chars = [b"\n", b" ", b"\t"]
-def __check_bad_chars(x: bytes):
+def check_bad_chars(x: bytes):
     for b in __bad_chars:
         if b in x:
             log.warn(f"{x} contains whitespace, which will interfere with scanf.")
@@ -18,12 +18,12 @@ def __check_bad_chars(x: bytes):
 
 def p64(x: int) -> bytes:
     y = _pack(x, 64)
-    __check_bad_chars(y)
+    check_bad_chars(y)
     return y
 
 def p32(x: int) -> bytes:
     y = _pack(x, 32)
-    __check_bad_chars(y)
+    check_bad_chars(y)
     return y
 
 def u64(x: bytes) -> int:
