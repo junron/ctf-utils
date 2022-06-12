@@ -27,8 +27,8 @@ def pwn(remote: str):
     
 @cli.command()
 def docker():
-    shutil.copyfile(os.path.join(Path(__file__).parent, "dockerfiles", "bullseye-2.31"), "./bullseye-2.31")
-    shutil.copyfile(os.path.join(Path(__file__).parent, "dockerfiles", "docker-compose.yml"), "docker-compose.yml")
+    shutil.copyfile(os.path.join(Path(__file__).parent.parent, "pwn", "dockerfiles", "bullseye-2.31"), "./bullseye-2.31")
+    shutil.copyfile(os.path.join(Path(__file__).parent.parent, "pwn", "dockerfiles", "docker-compose.yml"), "docker-compose.yml")
 
     
 @cli.command()
