@@ -17,7 +17,7 @@ def generate_template(remote_conn: str):
     for elf in elfs:
         os.system("chmod +x " + elf.path)
         # Shared objects are probably not the main ELF
-        if "so" in elf.path:
+        if elf.path.endswith(".so"):
             print("Detected shared object: " + elf.path)
             if "libc" in elf.path:
                 libc = os.path.relpath(elf.path)
@@ -44,6 +44,7 @@ def generate_template(remote_conn: str):
     {'libc = ELF("' + libc + '", checksec=False)' if libc is not None else '# libc = ELF("", checksec=False)'}
     {'ld = ELF("' + ld + '", checksec=False)' if ld is not None else '# ld = ELF("", checksec=False)'}
     context.binary = e
+    context.terminal = ['tmux', 'splitw', '-h']
 
     '''
     Bits: {context.bits}
@@ -81,7 +82,7 @@ def generate_template(remote_conn: str):
             # print(y)
             return y
             
-        send_p = lambda x: send_function(p, x)
+        send_p = lambda x: send(p, x)
 
         # libc_base = get_libc_base(p.pid)
         # e.address = get_pie_base(p.pid)
