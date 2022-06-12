@@ -30,6 +30,7 @@ def docker():
     shutil.copyfile(os.path.join(Path(__file__).parent.parent, "pwn", "dockerfiles", "bullseye-2.31"), "./Dockerfile")
     shutil.copyfile(os.path.join(Path(__file__).parent.parent, "pwn", "dockerfiles", "docker-compose.yml"), "docker-compose.yml")
     print("Run `sudo docker-compose run --rm vuln bash` to start container")
+    print("Don't forget to use tmux!")
 
     
 @cli.command()
