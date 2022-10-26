@@ -44,7 +44,7 @@ def generate_template(remote_conn: str):
     {'libc = ELF("' + libc + '", checksec=False)' if libc is not None else '# libc = ELF("", checksec=False)'}
     {'ld = ELF("' + ld + '", checksec=False)' if ld is not None else '# ld = ELF("", checksec=False)'}
     context.binary = e
-    context.terminal = ['tmux', 'splitw', '-h']
+    #context.terminal = ['tmux', 'splitw', '-h']
 
     '''
     Bits: {context.bits}
@@ -75,17 +75,10 @@ def generate_template(remote_conn: str):
     if __name__ == '__main__':
         # offset = find_bof_offset(setup)
         p = setup()
-        
-        def send(q, x: str|bytes):
-            q.sendlineafter("", x)
-            y = q.clean()
-            # print(y)
-            return y
-            
-        send_p = lambda x: send(p, x)
-
         # libc_base = get_libc_base(p.pid)
         # e.address = get_pie_base(p.pid)
+        
+        
         # Happy pwning!
         
         
