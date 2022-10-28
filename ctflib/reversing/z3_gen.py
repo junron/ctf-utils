@@ -1,16 +1,19 @@
 import textwrap
 import os
 
-def sym_str_template(length: int):
+def sym_str_template():
     template = textwrap.dedent(f"""
     from z3 import *
     from ctflib.reversing import *
-    inp = [BitVec(f"x{{i}}", 8) for i in range({length})]
+    
+    length = ?
+    
+    inp = [BitVec(f"x{{i}}", 8) for i in range(length)]
     
     def func(i):
-        return i
+        ?
         
-    target_output = b""
+    target_output = ?
     out = func(inp)
     
     sl = Solver()
