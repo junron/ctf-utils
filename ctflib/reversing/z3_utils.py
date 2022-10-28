@@ -103,3 +103,28 @@ def eval_all_solutions(solver, inputs, limit=-1):
         yield sol
     if len(sols) == 0:
         print("No solution")
+
+
+def sym_string(func, target_str: bytes, additional_constraints=None) -> bytes | None:
+    from z3 import BitVec, Solver, sat
+    inp = [BitVec(f"x{i}", 8) for i in range(len(target_str))]
+
+    out = func(inp)
+
+    sl = Solver()
+
+    for i, x in enumerate(out):
+        sl.add(x == target_str[i])
+
+    if additional_constraints is not None:
+        additional_constraints(sl, inp)
+
+    if sl.check() == sat:
+        m = sl.model()
+        b = []
+        for x in inp:
+            k = m.eval(x).as_long()
+            b.append(k)
+        return bytes(b)
+    return None
+

@@ -6,6 +6,7 @@ import click
 from pwnlib.elf import ELF
 
 import ctflib.pwn.template_gen as tg
+import ctflib.reversing.z3_gen as z3_gen
 import ctflib.web.template_gen as web_tg
 from ctflib.pwn.patcher import patch_alarms
 from ctflib.web.wasabi import init_wasabi
@@ -24,6 +25,10 @@ def cli(ctx):
 @click.option('--remote', '-r', default='', help='remote connection string')
 def pwn(remote: str):
     tg.generate_template(remote)
+    
+@cli.command()
+def z3():
+    z3_gen.sym_str_template()
     
 @cli.command()
 def docker():
