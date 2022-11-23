@@ -79,12 +79,3 @@ def find_hex(x:bytes|str, length: int):
             else:
                 return int(x[i:i+length],16)
             i += 1
-
-def is_remote(p: pwnlib.tubes.process.process):
-    return "rhost" in dir(p)
-
-def cyberthon_flag(p):
-    p.sendline("cat /home/*/*.txt")
-    x = p.clean()
-    print(x)
-    return x
