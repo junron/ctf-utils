@@ -41,6 +41,7 @@ class Process(pwnlib.tubes.process.process):
         if Gdb is None:
             if self.Gdb:
                 Gdb = self.Gdb
+                Gdb.Breakpoint(f"*{hex(address)}")
             else:
                 pid, Gdb = gdb.attach(self, f"break *{hex(address)}", api=True)
         else:
