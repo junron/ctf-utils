@@ -17,7 +17,7 @@ def generate_template(remote_conn: str):
     for elf in elfs:
         os.system("chmod +x " + elf.path)
         # Shared objects are probably not the main ELF
-        if elf.path.endswith(".so"):
+        if ".so" in elf.path:
             print("Detected shared object: " + elf.path)
             if "libc" in elf.path:
                 libc = os.path.relpath(elf.path)
@@ -26,6 +26,9 @@ def generate_template(remote_conn: str):
             continue
         # Ignore core files
         if os.path.basename(elf.path) == "core":
+            continue
+        if "patched" in os.path.basename(elf.path):
+            mainElf = elf
             continue
         if mainElf is not None:
             print("Warning: detected multiple ELFs", mainElf.path)
@@ -64,7 +67,7 @@ def generate_template(remote_conn: str):
     '''
     
     def setup():
-        p = e.process()
+        p = process()
         # p = process([ld.path, e.path], env={{"LD_PRELOAD": libc.path}})
         # p = remote("{remote_conn}")
         return p
