@@ -8,7 +8,7 @@ from pwnlib.elf import ELF
 import ctflib.pwn.template_gen as tg
 import ctflib.reversing.z3_gen as z3_gen
 import ctflib.web.template_gen as web_tg
-from ctflib.pwn.patcher import patch_alarms
+from ctflib.pwn.patcher import patch
 from ctflib.web.wasabi import init_wasabi
 
 
@@ -40,9 +40,9 @@ def docker():
     
 @cli.command()
 @click.option('--elf', '-e', default='', help='Binary to patch')
-def disalarm(elf: str):
+def detime(elf: str):
     e = ELF(elf)
-    patch_alarms(e)
+    patch(e)
     print("Patched!")
     
 @cli.command()

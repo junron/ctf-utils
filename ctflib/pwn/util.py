@@ -1,12 +1,14 @@
 import os
 import string
 from binascii import a2b_hex
-from typing import Union, Callable, Tuple
+from typing import Union, Callable
+
 import pwnlib.tubes.process
 from pwnlib.context import context
+from pwnlib.util.packing import unpack as _unpack
 
 SetupFunction = Callable[[], pwnlib.tubes.process.process]
-SendFunction = Callable[[pwnlib.tubes.process.process, str|bytes], str|bytes]
+SendFunction = Callable[[pwnlib.tubes.process.process, str | bytes], str | bytes]
 
 
 def decode_to_ascii(input: Union[str, int, bytes]) -> bytes:
@@ -52,30 +54,54 @@ def remote(connect_str: str) -> pwnlib.tubes.remote:
         host, port = connect_str.split()
     return pwnlib.tubes.remote.remote(host.strip(), int(port.strip()))
 
-def find_nonascii(x:bytes, length:int):
-    for i,a in enumerate(x):
-        if a not in string.printable.encode():
-            return x[i:i+length]
 
-def find_leak(x:bytes, length:int):
+def find_nonascii(x: bytes, length: int):
+    for i, a in enumerate(x):
+        if a not in string.printable.encode():
+            l = x[i:i + length]
+            if len(l) != length:
+                continue
+            return l
+
+
+def find_leak(x: bytes, length: int = 6) -> bytes | None:
     if b"\x7f" not in x:
         return find_nonascii(x, length)
     i = x.index(b"\x7f")
-    return x[i-length+1:i+1]
+    l = x[i - length + 1:i + 1]
+    if len(l) != length:
+        return None
+    return l
 
-def find_hex(x:bytes|str, length: int):
+
+def find_leak64(x: bytes, length: int = 6) -> int | None:
+    leak = find_leak(x, length)
+    if leak is None:
+        return leak
+    return _unpack(leak + b"\0" * (8 - length), 64)
+
+
+def find_hex(x: bytes, length: int | None = None) -> int | None:
     if type(x) is str:
         x = x.encode()
     hexdigits = b"abcdefABCDEF0123456789"
     if b"0x" in x:
         i = x.index(b"0x")
-        return int(x[i+2:i+length+2],16)
-    else:
-        i = 0
-        while i < len(x)-length+1:
-            for j in range(i, i+length):
-                if x[j] not in hexdigits:
-                    break
-            else:
-                return int(x[i:i+length],16)
-            i += 1
+        x = x[i + 2:]
+    i = 0
+    hex_str = b""
+    for i in range(len(x)):
+        if x[i] not in hexdigits:
+            break
+        hex_str += bytes([x[i]])
+        i += 1
+        if i == length:
+            break
+    if length is not None and i < length:
+        return None
+    return int(hex_str, 16)
+
+
+if __name__ == "__main__":
+    assert find_hex(b"0x1337") == 0x1337
+    assert find_hex(b"0x1337", 2) == 0x13

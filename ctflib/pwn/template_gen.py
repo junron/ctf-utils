@@ -1,6 +1,7 @@
 import textwrap
 
 from ctflib.pwn import *
+from ctflib.pwn.patcher import is_patchable, patch
 
 
 def generate_template(remote_conn: str):
@@ -11,7 +12,7 @@ def generate_template(remote_conn: str):
         if "ELF" in os.popen("file " + file).read():
             elfs.append(ELF(file, checksec=False))
 
-    mainElf = None
+    main_elf = None
     libc = None
     ld = None
     for elf in elfs:
@@ -28,14 +29,15 @@ def generate_template(remote_conn: str):
         if os.path.basename(elf.path) == "core":
             continue
         if "patched" in os.path.basename(elf.path):
-            mainElf = elf
+            main_elf = elf
             continue
-        if mainElf is not None:
-            print("Warning: detected multiple ELFs", mainElf.path)
-        mainElf = elf
+        if main_elf is not None:
+            print("Warning: detected multiple ELFs", main_elf.path)
+        main_elf = elf
 
-    context.binary = mainElf
-    elf_sec = ELFSec.get_sec(mainElf)
+    context.binary = main_elf
+    elf_sec = ELFSec.get_sec(main_elf)
+    elf_name = os.path.relpath(main_elf.path)
     template = textwrap.dedent(f"""
     from ctflib.pwn import *
     
@@ -43,7 +45,7 @@ def generate_template(remote_conn: str):
     gen_func
     '''
 
-    e = ELF("{os.path.relpath(mainElf.path)}")
+    e = ELF("{elf_name}")
     {'libc = ELF("' + libc + '", checksec=False)' if libc is not None else '# libc = ELF("", checksec=False)'}
     {'ld = ELF("' + ld + '", checksec=False)' if ld is not None else '# ld = ELF("", checksec=False)'}
     context.binary = e
@@ -92,6 +94,10 @@ def generate_template(remote_conn: str):
     if os.path.exists("solve.py"):
         if input("solve.py already exists. Overwrite? [y/N] ").strip().lower() != "y":
             exit()
+    if is_patchable(main_elf):
+        if input(f"{elf_name} contains sleep or alarm functions. Patch away? [y/N]").strip().lower() == "y":
+            patch(main_elf)
+            print("Patched!")
     with open("solve.py", "w") as f:
         f.write(template)
     print("Generated solve.py")
