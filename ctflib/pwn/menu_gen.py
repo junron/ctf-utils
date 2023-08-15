@@ -15,7 +15,7 @@ def can_be_int(x):
 
 
 def remove_ansi(x: bytes):
-    ansi_escape = re.compile(r'(\x9B|\x1B\[)[0-?]*[ -\\/]*[@-~]')
+    ansi_escape = re.compile(r'(\x9B|\x1B\[)[0-?]*[ -\\/]*[@-~]'.encode())
     return ansi_escape.sub(b'', x)
 
 
@@ -59,7 +59,7 @@ def menu_gen(e: ELF):
     
     print("Welcome to menu generator. ")
     print(f"Your inputs to {e.path} will be recorded and used to generate functions to help you interact with the binary")
-    print(f"Type '{QUIT_WORD}' to end menu generation and '{GET_STR}' as an input to be extracted.")
+    print(f"Type '{QUIT_WORD.decode()}' to end menu generation and '{GET_STR.decode()}' as an input to be extracted.")
     print("Press enter to continue.")
     print()
     input()
