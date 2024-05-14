@@ -25,11 +25,13 @@ class Process(pwnlib.tubes.process.process):
                  where='local',
                  display=None,
                  alarm=None,
+                 decompiler_ip=None,
                  *args,
                  **kwargs
                  ):
         super(Process, self).__init__(*args, **kwargs)
         self.Gdb = None
+        self.decompiler_ip = decompiler_ip
 
     def breakpoint(self: pwnlib.tubes.process, address: int, Gdb: pwnlib.gdb.Gdb = None, block=False) -> pwnlib.gdb.Gdb:
         # probably PIE
@@ -43,7 +45,10 @@ class Process(pwnlib.tubes.process.process):
                 Gdb = self.Gdb
                 Gdb.Breakpoint(f"*{hex(address)}")
             else:
-                pid, Gdb = gdb.attach(self, f"break *{hex(address)}", api=True)
+                decompiler_attach_string = ""
+                if self.decompiler_ip:
+                    decompiler_attach_string = f"decompiler connect ida --host {self.decompiler_ip} --port 3662\n"
+                pid, Gdb = gdb.attach(self, f"{decompiler_attach_string}break *{hex(address)}", api=True)
         else:
             Gdb.Breakpoint(f"*{hex(address)}")
         if block:

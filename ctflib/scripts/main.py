@@ -24,8 +24,9 @@ def cli(ctx):
 
 @cli.command()
 @click.option('--remote', '-r', default='', help='remote connection string')
-def pwn(remote: str):
-    tg.generate_template(remote)
+@click.option('--decompiler', '-d', default='', help='IP address of IDA decompiler to connect to')
+def pwn(remote: str, decompiler: str):
+    tg.generate_template(remote, decompiler)
 
 
 @cli.command()

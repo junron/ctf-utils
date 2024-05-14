@@ -4,7 +4,7 @@ from ctflib.pwn import *
 from ctflib.pwn.patcher import is_patchable, patch
 
 
-def generate_template(remote_conn: str):
+def generate_template(remote_conn: str, decompiler_ip: str):
     # Detect ELF from current files
     elfs = []
     for file in os.listdir():
@@ -40,10 +40,6 @@ def generate_template(remote_conn: str):
     elf_name = os.path.relpath(main_elf.path)
     template = textwrap.dedent(f"""
     from ctflib.pwn import *
-    
-    '''
-    gen_func
-    '''
 
     e = ELF("{elf_name}")
     {'libc = ELF("' + libc + '", checksec=False)' if libc is not None else '# libc = ELF("", checksec=False)'}
@@ -63,14 +59,9 @@ def generate_template(remote_conn: str):
     GOT: {'Yes' if elf_sec.got_writable else 'No'}
     fini_array: {'Yes' if elf_sec.fini_array_writable else 'No'}
     '''
-    
-    '''
-    gen_funcs([""], setup, __file__)
-    '''
-    
+
     def setup():
-        p = process()
-        # p = process([ld.path, e.path], env={{"LD_PRELOAD": libc.path}})
+        p = process(decompiler_ip="{decompiler_ip}")
         # p = remote("{remote_conn}")
         return p
     

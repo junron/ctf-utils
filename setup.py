@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(name='ctflib',
-      version='4.6.1',
+      version='4.7.0',
       description='Tools for speeding up CTFing',
       author='jro',
       install_requires=["z3-solver", "aiohttp", "requests", "pwntools", "click"],
